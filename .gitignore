@@ -1,0 +1,45 @@
+# .gitignore for .NET / Visual Studio / WinUI projects
+
+# Build outputs
+bin/
+obj/
+artifacts/
+publish/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / JetBrains
+.idea/
+
+# VS Code
+.vscode/
+
+# NuGet
+*.nupkg
+.nuget/
+packages/
+
+# Rider caches
+.caches/
+
+# User secrets
+secrets.json
+appsettings.Development.json
+
+# Logs
+*.log
+TestResults/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Publish / single-file / runtime
+publish/
+*.runtimeconfig.json
+*.runtimeconfig.dev.json

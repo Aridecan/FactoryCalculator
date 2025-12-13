@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "FactoryCalculator (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "FactoryCalculator (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
