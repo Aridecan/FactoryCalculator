@@ -27,13 +27,10 @@ jobs:
           restore-keys: |
             nuget-${{ runner.os }}-
 
-      - name: Install dotnet-format
-        run: dotnet tool install -g dotnet-format --version 8.*
-
       - name: Restore
         run: dotnet restore FactoryCalculator.sln
 
-      - name: Format check
+      - name: Format check (using built-in dotnet format)
         run: dotnet format FactoryCalculator.sln --verify-no-changes
 
       - name: Build (disable ReadyToRun optimization in CI)
