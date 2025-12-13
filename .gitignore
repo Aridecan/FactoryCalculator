@@ -24,22 +24,14 @@ publish/
 .nuget/
 packages/
 
-# Rider caches
-.caches/
-
-# User secrets
+# User secrets & local settings
 secrets.json
 appsettings.Development.json
 
-# Logs
+# Logs & test results
 *.log
 TestResults/
 
 # OS
 Thumbs.db
 .DS_Store
-
-# Publish / single-file / runtime
-publish/
-*.runtimeconfig.json
-*.runtimeconfig.dev.json

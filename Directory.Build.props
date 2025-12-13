@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <!-- Use latest analyzer rules -->
+    <AnalysisLevel>latest</AnalysisLevel>
+
+    <!-- In CI (GitHub Actions) the CI environment variable is set; make warnings errors there -->
+    <TreatWarningsAsErrors Condition="'$(CI)' == 'true'">true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Roslyn analyzers -->
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.0" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

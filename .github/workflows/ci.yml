@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-and-test:
-    name: Build and Test (Windows)
+    name: Build, Format Check and Test (Windows)
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -27,11 +27,17 @@ jobs:
           restore-keys: |
             nuget-${{ runner.os }}-
 
+      - name: Install dotnet-format
+        run: dotnet tool install -g dotnet-format --version 8.*
+
       - name: Restore
         run: dotnet restore FactoryCalculator.sln
 
-      - name: Build
-        run:  dotnet build FactoryCalculator.sln --configuration Release --no-restore -p:PublishReadyToRun=false
+      - name: Format check
+        run: dotnet format FactoryCalculator.sln --verify-no-changes
+
+      - name: Build (disable ReadyToRun optimization in CI)
+        run: dotnet build FactoryCalculator.sln --configuration Release --no-restore -p:PublishReadyToRun=false
 
       - name: Run tests
         run: dotnet test FactoryCalculator.sln --configuration Release --no-build --verbosity normal
