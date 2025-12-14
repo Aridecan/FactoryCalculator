@@ -1,0 +1,44 @@
+<Page
+    x:Class="FactoryCalculator.Views.GameSetupPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    mc:Ignorable="d"
+    xmlns:local="using:FactoryCalculator.Views">
+
+    <ScrollViewer>
+        <StackPanel Padding="20" Spacing="12">
+            <TextBlock Text="Game Setup" FontSize="20" FontWeight="SemiBold" />
+
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Text="Config Path:" VerticalAlignment="Center" Width="90" />
+                <TextBox x:Name="PathTextBox" Width="520" Text="{Binding ConfigPath, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Text="Game Name:" VerticalAlignment="Center" Width="90" />
+                <TextBox Width="300" Text="{Binding GameName, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Text="Unit Rate:" VerticalAlignment="Center" Width="90" />
+                <!-- ItemsSource is populated from code-behind with enum values -->
+                <ComboBox x:Name="UnitRateComboBox" Width="200" SelectedItem="{Binding UnitRate, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button x:Name="LoadButton" Content="Load" Width="120" Click="OnLoadClicked" />
+                <Button x:Name="SaveButton" Content="Save" Width="120" Click="OnSaveClicked" />
+            </StackPanel>
+
+            <TextBlock Text="JSON Preview" FontWeight="SemiBold" />
+            <TextBox
+                Text="{Binding SerializedJson, Mode=OneWay}"
+                AcceptsReturn="True"
+                TextWrapping="Wrap"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                Height="300" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -26,6 +26,9 @@ namespace FactoryCalculator
         public MainWindow()
         {
             InitializeComponent();
+
+            // Show the GameSetupPage at startup.
+            Content = new Frame { Content = new Views.GameSetupPage() };
         }
     }
 }
