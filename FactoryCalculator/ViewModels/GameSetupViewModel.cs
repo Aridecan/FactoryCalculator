@@ -1,12 +1,21 @@
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.UI.Dispatching;
+using System.Windows.Input;
+using FactoryCalculator.Core;
 
 namespace FactoryCalculator.ViewModels
 {
+    public sealed class UnitRateOption
+    {
+        public UnitRate Value { get; init; }
+        public string Display { get; init; } = string.Empty;
+    }
+
     public sealed class GameSetupViewModel : INotifyPropertyChanged
     {
         private static readonly JsonSerializerOptions s_jsonOptions = new(JsonSerializerDefaults.Web)
@@ -16,10 +25,26 @@ namespace FactoryCalculator.ViewModels
 
         private string _configPath = string.Empty;
         private string _gameName = "New Game";
-        private FactoryCalculator.Core.UnitRate _unitRate = FactoryCalculator.Core.UnitRate.PerMinute;
+        private UnitRate _unitRate = UnitRate.PerMinute;
         private string _serializedJson = string.Empty;
+        private string _newIngredientType = string.Empty;
 
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        public ObservableCollection<string> IngredientTypes { get; } = new();
+
+        public ObservableCollection<UnitRateOption> UnitRateOptions { get; } = new()
+        {
+            new UnitRateOption { Value = UnitRate.PerSecond, Display = "per second" },
+            new UnitRateOption { Value = UnitRate.PerMinute, Display = "per minute" },
+            new UnitRateOption { Value = UnitRate.PerHour, Display = "per hour" }
+        };
+
+        // Commands
+        public ICommand LoadCommand { get; }
+        public ICommand SaveCommand { get; }
+        public ICommand AddIngredientCommand { get; }
+        public ICommand RemoveIngredientCommand { get; }
 
         public string ConfigPath
         {
@@ -33,7 +58,7 @@ namespace FactoryCalculator.ViewModels
             set => SetProperty(ref _gameName, value);
         }
 
-        public FactoryCalculator.Core.UnitRate UnitRate
+        public UnitRate UnitRate
         {
             get => _unitRate;
             set => SetProperty(ref _unitRate, value);
@@ -48,8 +73,25 @@ namespace FactoryCalculator.ViewModels
             private set => SetProperty(ref _serializedJson, value);
         }
 
+        public string NewIngredientType
+        {
+            get => _newIngredientType;
+            set => SetProperty(ref _newIngredientType, value);
+        }
+
         public GameSetupViewModel()
         {
+            // populate defaults
+            IngredientTypes.Add("Solid");
+            IngredientTypes.Add("Liquid");
+            IngredientTypes.Add("Gas");
+
+            // wire commands
+            LoadCommand = new AsyncRelayCommand(_ => LoadAsync());
+            SaveCommand = new AsyncRelayCommand(_ => SaveAsync());
+            AddIngredientCommand = new RelayCommand(_ => AddIngredientType());
+            RemoveIngredientCommand = new RelayCommand(p => RemoveIngredientType(p as string));
+
             UpdateSerializedJson();
         }
 
@@ -60,20 +102,18 @@ namespace FactoryCalculator.ViewModels
                 throw new InvalidOperationException("ConfigPath must be set before loading.");
             }
 
-            // Capture the UI dispatcher while we're still on the UI thread so we can marshal updates back.
-            var uiDispatcher = DispatcherQueue.GetForCurrentThread();
+            var uiDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 
-            var profile = await FactoryCalculator.Core.ConfigStore.LoadAsync(ConfigPath).ConfigureAwait(false);
+            var profile = await ConfigStore.LoadAsync(ConfigPath).ConfigureAwait(false);
             if (profile is null)
             {
-                var defaultProfile = new FactoryCalculator.Core.GameProfile
+                var defaultProfile = new GameProfile
                 {
                     GameName = _gameName,
                     UnitRate = _unitRate
                 };
 
                 var json = JsonSerializer.Serialize(defaultProfile, s_jsonOptions);
-
                 if (uiDispatcher is not null)
                 {
                     uiDispatcher.TryEnqueue(() => SerializedJson = json);
@@ -86,11 +126,20 @@ namespace FactoryCalculator.ViewModels
                 return;
             }
 
-            // Apply the loaded values on the UI thread to avoid raising PropertyChanged across threads.
             void ApplyProfile()
             {
                 GameName = profile.GameName;
                 UnitRate = profile.UnitRate;
+
+                IngredientTypes.Clear();
+                if (profile.IngredientTypes is not null)
+                {
+                    foreach (var t in profile.IngredientTypes)
+                    {
+                        IngredientTypes.Add(t);
+                    }
+                }
+
                 SerializedJson = JsonSerializer.Serialize(profile, s_jsonOptions);
             }
 
@@ -111,19 +160,18 @@ namespace FactoryCalculator.ViewModels
                 throw new InvalidOperationException("ConfigPath must be set before saving.");
             }
 
-            // Capture UI dispatcher in case we resume on a background thread.
-            var uiDispatcher = DispatcherQueue.GetForCurrentThread();
+            var uiDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 
-            var profile = new FactoryCalculator.Core.GameProfile
+            var profile = new GameProfile
             {
                 GameName = GameName,
-                UnitRate = UnitRate
+                UnitRate = UnitRate,
+                IngredientTypes = new System.Collections.Generic.List<string>(IngredientTypes)
             };
 
-            await FactoryCalculator.Core.ConfigStore.SaveAsync(profile, ConfigPath).ConfigureAwait(false);
+            await ConfigStore.SaveAsync(profile, ConfigPath).ConfigureAwait(false);
 
             var json = JsonSerializer.Serialize(profile, s_jsonOptions);
-
             if (uiDispatcher is not null)
             {
                 uiDispatcher.TryEnqueue(() => SerializedJson = json);
@@ -134,12 +182,39 @@ namespace FactoryCalculator.ViewModels
             }
         }
 
+        public void AddIngredientType()
+        {
+            var candidate = (NewIngredientType ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(candidate))
+            {
+                return;
+            }
+
+            if (!IngredientTypes.Any(t => string.Equals(t, candidate, StringComparison.OrdinalIgnoreCase)))
+            {
+                IngredientTypes.Add(candidate);
+            }
+
+            NewIngredientType = string.Empty;
+        }
+
+        public void RemoveIngredientType(string? type)
+        {
+            if (type is null)
+            {
+                return;
+            }
+
+            IngredientTypes.Remove(type);
+        }
+
         private void UpdateSerializedJson()
         {
-            var profile = new FactoryCalculator.Core.GameProfile
+            var profile = new GameProfile
             {
                 GameName = GameName,
-                UnitRate = UnitRate
+                UnitRate = UnitRate,
+                IngredientTypes = new System.Collections.Generic.List<string>(IngredientTypes)
             };
 
             SerializedJson = JsonSerializer.Serialize(profile, s_jsonOptions);
@@ -154,11 +229,10 @@ namespace FactoryCalculator.ViewModels
 
             field = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            if (propertyName == nameof(GameName) || propertyName == nameof(UnitRate))
+            if (propertyName == nameof(GameName) || propertyName == nameof(UnitRate) || propertyName == nameof(IngredientTypes))
             {
                 UpdateSerializedJson();
             }
         }
     }
 }
-

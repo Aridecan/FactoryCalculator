@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
+using FactoryCalculator.ViewModels;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System.Threading.Tasks;
-using FactoryCalculator.ViewModels;
 
 namespace FactoryCalculator.Views
 {
@@ -17,9 +17,6 @@ namespace FactoryCalculator.Views
             InitializeComponent();
             _viewModel = new GameSetupViewModel();
             DataContext = _viewModel;
-
-            // Populate ComboBox with enum values so SelectedItem binds to UnitRate (enum)
-            UnitRateComboBox.ItemsSource = Enum.GetValues(typeof(FactoryCalculator.Core.UnitRate)).Cast<FactoryCalculator.Core.UnitRate>();
         }
 
         private async void OnLoadClicked(object sender, RoutedEventArgs e)
@@ -53,6 +50,19 @@ namespace FactoryCalculator.Views
                 var details = $"{ex.GetType().FullName} HResult=0x{ex.HResult:X8}\n{ex}";
                 System.Diagnostics.Debug.WriteLine($"[GameSetup] Save failed: {details}");
                 DispatcherQueue.TryEnqueue(async () => await ShowMessageAsync($"Save failed:\n{details}"));
+            }
+        }
+
+        private async void OnAddIngredientClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.AddIngredientType();
+        }
+
+        private async void OnRemoveIngredientClicked(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button b && b.Tag is string tag)
+            {
+                _viewModel.RemoveIngredientType(tag);
             }
         }
 

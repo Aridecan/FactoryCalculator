@@ -5,7 +5,10 @@ namespace FactoryCalculator.Core
     public sealed record GameProfile
     {
         public string GameName { get; init; } = "New Game";
-        public List<IngredientType> IngredientTypes { get; init; } = new() { IngredientType.Solid, IngredientType.Liquid, IngredientType.Gas };
+
+        // Now a list of strings so each game can define its own ingredient/type set
+        public List<string> IngredientTypes { get; init; } = new() { "Solid", "Liquid", "Gas" };
+
         public UnitRate UnitRate { get; init; } = UnitRate.PerMinute;
         public List<Models.Item> Items { get; init; } = new();
         public List<Models.Machine> Machines { get; init; } = new();

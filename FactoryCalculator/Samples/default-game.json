@@ -2,8 +2,7 @@
   "gameName": "Test New Game",
   "ingredientTypes": [
     "Solid",
-    "Liquid",
-    "Gas"
+    "Liquid"
   ],
   "unitRate": "PerMinute",
   "items": [],

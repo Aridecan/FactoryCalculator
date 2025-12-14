@@ -1,6 +1,6 @@
 using System;
-using Xunit;
 using FactoryCalculator.Core;
+using Xunit;
 
 namespace FactoryCalculator.Core.Tests
 {

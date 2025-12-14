@@ -13,6 +13,9 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <Page Remove="Views\MachinesPage.xaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -52,6 +55,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FactoryCalculator.Core\FactoryCalculator.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Views\MachinesPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.101" />
